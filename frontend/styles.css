@@ -64,12 +64,12 @@ body {
 }
 
 .btn-danger {
-    background-color: var(--danger-color);
+    background-color: #f88363;
     color: var(--text-light);
 }
 
 .btn-logout {
-    background-color: var(--danger-color);
+    background-color: #f88363;
     color: var(--text-light);
     padding: 8px 16px;
     font-size: 12px;
@@ -246,7 +246,7 @@ body {
 .welcome-container h2 {
     font-size: 35px;
     font-weight: bold;
-    color: #bf9264;
+    color: #98521f;
     margin-bottom: 20px;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
 }
@@ -329,7 +329,7 @@ body {
     text-align: center;
     font-size: 28px;
     font-weight: bold;
-    color: #bf9264;
+    color: #98521f;
     margin-bottom: 30px;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
 }
@@ -410,7 +410,7 @@ body {
 }
 
 .delete-btn {
-    background-color: var(--danger-color);
+    background-color: #f88363;
     color: var(--text-light);
     border: none;
     padding: 8px 12px;
@@ -421,7 +421,7 @@ body {
 }
 
 .delete-btn:hover {
-    background-color: #d32f2f;
+    background-color: #f88363;
     transform: scale(1.05);
 }
 
@@ -479,14 +479,14 @@ body {
 .about-container h2 {
     font-size: 35px;
     font-weight: bold;
-    color: #bf9264;
+    color: #98521f;
     margin-bottom: 30px;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
 }
 
 .about-description {
     font-size: 16px;
-    color: wheat;
+    color: #bf9264;
     line-height: 1.6;
     margin-bottom: 30px;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
@@ -495,7 +495,7 @@ body {
 .about-container h3 {
     font-size: 18px;
     font-weight: bold;
-    color: wheat;
+    color: #bf9264;
     margin-bottom: 15px;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
 }
@@ -504,7 +504,7 @@ body {
     list-style: none;
     text-align: left;
     display: inline-block;
-    color: wheat;
+    color: #bf9264;
     font-size: 14px;
     line-height: 1.8;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
@@ -1149,7 +1149,7 @@ body {
 
 .plan-modal-header {
     padding: 20px 30px;
-    background: linear-gradient(135deg, #4CAF50 0%, #2196F3 100%);
+    background: linear-gradient(135deg, #4CAF50 0%, #6f826a 100%);
     color: white;
     display: flex;
     justify-content: space-between;
@@ -1253,7 +1253,7 @@ body {
 }
 
 .btn-icon-delete {
-    background: var(--danger-color);
+    background: #f88363;
     border: none;
     color: white;
     width: 28px;
@@ -1268,7 +1268,7 @@ body {
 }
 
 .btn-icon-delete:hover {
-    background: #d32f2f;
+    background: #f88363;
     transform: scale(1.1);
 }
 
@@ -1553,7 +1553,7 @@ body {
 /* Header del modal de vista previa */
 .preview-modal-header {
     padding: 20px 30px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #4CAF50 0%, #6f826a 100%);
     color: white;
     display: flex;
     justify-content: space-between;
