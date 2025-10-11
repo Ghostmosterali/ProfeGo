@@ -1,0 +1,210 @@
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProfeGo - Tu biblioteca personal</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Aplicación Principal -->
+    <div id="main-section" class="section">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <span id="user-info">👋 Hola, usuario@ejemplo.com</span>
+                <button id="logout-btn" class="btn btn-logout">Cerrar Sesión</button>
+            </div>
+        </header>
+
+        <!-- Menú de Navegación -->
+        <nav class="nav-menu">
+            <button id="nav-inicio" class="nav-btn active">🏠 INICIO</button>
+            <button id="nav-archivos" class="nav-btn">📁 ARCHIVOS</button>
+            <button id="nav-planes" class="nav-btn">📚 PLAN DE ESTUDIO</button>
+            <button id="nav-acerca" class="nav-btn">ℹ️ ACERCA DE</button>
+        </nav>
+
+        <!-- Contenido Principal -->
+        <main id="main-content" class="main-content">
+            
+            <!-- Sección Inicio -->
+            <div id="inicio-content" class="content-section active">
+                <div class="welcome-container">
+                    <h2>¡Bienvenido a ProfeGo!</h2>
+                    <p class="welcome-subtitle">Tu plataforma personal para gestionar archivos y recursos educativos</p>
+                    
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">☁️</div>
+                            <h3>Sube archivos</h3>
+                            <p>Almacena tus documentos de forma segura</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">🔄</div>
+                            <h3>Procesa automáticamente</h3>
+                            <p>Extrae texto con OCR y conversión</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">📥</div>
+                            <h3>Vista previa</h3>
+                            <p>Visualiza tus archivos antes de descargar</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección Archivos -->
+            <div id="archivos-content" class="content-section hidden">
+                <div class="files-container">
+                    <div class="upload-section">
+                        <label for="file-input" class="upload-btn">📤 Subir y procesar archivos</label>
+                        <input type="file" id="file-input" multiple accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.xlsx,.xls" hidden>
+                    </div>
+                    
+                    <h2 class="library-title">📚 Mi Biblioteca</h2>
+                    
+                    <div id="files-gallery" class="files-gallery">
+                        <!-- Los archivos se cargarán aquí dinámicamente -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección Plan de Estudio -->
+            <div id="planes-content" class="content-section hidden">
+                <div class="planes-container">
+                    <div class="planes-header">
+                        <h2 class="planes-title">📚 Planes de Estudio</h2>
+                        <button id="create-plan-btn" class="btn btn-primary">
+                            ➕ Crear Plan de Estudio
+                        </button>
+                    </div>
+
+                    <!-- Historial de Planes -->
+                    <div class="planes-history">
+                        <h3 class="section-subtitle">📖 Mis Planes de Estudio</h3>
+                        <div id="planes-list" class="planes-list">
+                            <div class="empty-state">
+                                <p>No hay actividades para mostrar.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección Acerca De -->
+            <div id="acerca-content" class="content-section hidden">
+                <div class="about-container">
+                    <h2>Sobre ProfeGo</h2>
+                    <p class="about-description">
+                        ProfeGo es una plataforma diseñada para educadores que necesitan 
+                        organizar y gestionar sus recursos digitales de forma eficiente.
+                    </p>
+                    
+                    <h3>Características principales:</h3>
+                    <ul class="features-list">
+                        <li>• Almacenamiento seguro en la nube</li>
+                        <li>• Procesamiento automático con OCR</li>
+                        <li>• Extracción de texto de múltiples formatos</li>
+                        <li>• Vista previa de archivos</li>
+                        <li>• Sincronización automática</li>
+                        <li>• Interfaz intuitiva y fácil de usar</li>
+                        <li>• Acceso desde cualquier dispositivo</li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p id="loading-text">Subiendo y procesando archivos...</p>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación -->
+    <div id="confirm-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Confirmar eliminación</h3>
+            <p id="confirm-message">¿Estás seguro de que quieres eliminar este archivo?</p>
+            <div class="modal-buttons">
+                <button id="confirm-yes" class="btn btn-danger">Eliminar</button>
+                <button id="confirm-no" class="btn btn-secondary">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Vista Previa de Archivos -->
+    <div id="preview-modal" class="modal-overlay">
+        <div class="preview-modal-container">
+            <div class="preview-modal-header">
+                <h2 id="preview-filename">Vista previa</h2>
+                <div class="preview-actions">
+                    <button id="download-preview-btn" class="btn btn-secondary btn-sm" title="Descargar archivo">
+                        📥 Descargar
+                    </button>
+                    <button id="close-preview-modal" class="close-modal-btn">✕</button>
+                </div>
+            </div>
+            
+            <div class="preview-modal-content">
+                <div id="preview-container" class="preview-container">
+                    <!-- El contenido se cargará aquí dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Crear/Editar Plan de Estudio -->
+    <div id="plan-modal" class="modal-overlay">
+        <div class="plan-modal-container">
+            <div class="plan-modal-header">
+                <h2 id="plan-modal-title">Crear Plan de Estudio</h2>
+                <button id="close-plan-modal" class="close-modal-btn">✕</button>
+            </div>
+            
+            <div class="plan-modal-content">
+                <div class="plan-form">
+                    <div class="form-group">
+                        <label for="plan-nombre">Nombre del Plan:</label>
+                        <input type="text" id="plan-nombre" placeholder="Ej: Matemáticas Básicas" required>
+                    </div>
+
+                    <div class="modules-container" id="modules-container">
+                        <!-- Los módulos se agregarán aquí dinámicamente -->
+                    </div>
+
+                    <button id="add-module-btn" class="btn btn-secondary">
+                        ➕ Agregar Módulo
+                    </button>
+                </div>
+            </div>
+
+            <div class="plan-modal-footer">
+                <button id="save-plan-btn" class="btn btn-primary">Guardar Plan</button>
+                <button id="cancel-plan-btn" class="btn btn-secondary">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Selector de Archivos (Biblioteca) -->
+    <div id="file-selector-modal" class="modal-overlay">
+        <div class="file-selector-container">
+            <div class="file-selector-header">
+                <h3>Seleccionar archivo de la biblioteca</h3>
+                <button id="close-file-selector" class="close-modal-btn">✕</button>
+            </div>
+            <div class="file-selector-content">
+                <div id="file-selector-list" class="file-selector-list">
+                    <!-- Los archivos se cargarán aquí -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="shared.js"></script>
+    <script src="menu-script.js"></script>
+</body>
+</html>

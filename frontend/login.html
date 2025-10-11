@@ -1,0 +1,184 @@
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProfeGo - Login</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Pantalla Login -->
+    <div id="login-section" class="section-active">
+        <div class="login-container">
+            <div class="login-card">
+                <h1 class="app-title">ProfeGo</h1>
+                <p class="app-subtitle">La biblioteca de los profesores</p>
+
+                <form id="auth-form" class="auth-form">
+                    <div class="input-group">
+                        <input type="email" id="email" placeholder="Correo electrónico" required>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" id="password" placeholder="Contraseña" required>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="submit" id="login-btn" class="btn btn-primary">Ingresar</button>
+                        <button type="button" id="register-btn" class="btn btn-secondary">Registrar</button>
+                    </div>
+                </form>
+
+                <div id="auth-message" class="message hidden"></div>
+                
+                <div class="terms-footer">
+                    <p>Al registrarte, aceptas nuestros 
+                        <a href="#" class="terms-link" id="open-terms">Términos y Condiciones</a> 
+                        y nuestra 
+                        <a href="#" class="terms-link" id="open-privacy">Política de Privacidad</a>.
+                    </p>
+                </div>
+                
+                <div class="footer-content">
+                    <p>&copy; 2025 ProfeGo. Todos los derechos reservados.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay oscurecido (UNO SOLO) -->
+    <div class="modal-overlay" id="modal-overlay"></div>
+
+    <!-- Modal de Términos y Condiciones -->
+    <div class="terms-modal" id="terms-modal">
+        <div class="modal-header">
+            <h2>Términos y Condiciones</h2>
+        </div>
+        <div class="terms-modal-content">
+            <p><strong>Última actualización:</strong> Octubre 2025</p>
+            
+            <h3>1. Aceptación de los Términos</h3>
+            <p>Al acceder y utilizar ProfeGo, usted acepta estar sujeto a estos Términos y Condiciones. Si no está de acuerdo con alguna parte de estos términos, no debe utilizar nuestro servicio.</p>
+            
+            <h3>2. Descripción del Servicio</h3>
+            <p>ProfeGo es una plataforma de gestión de archivos y recursos educativos diseñada para profesores. Ofrecemos servicios de almacenamiento, procesamiento de documentos mediante OCR y herramientas de organización.</p>
+            
+            <h3>3. Registro y Cuenta de Usuario</h3>
+            <p>Para utilizar ProfeGo, debe crear una cuenta proporcionando información precisa y completa. Usted es responsable de:</p>
+            <ul>
+                <li>Mantener la confidencialidad de su contraseña</li>
+                <li>Todas las actividades que ocurran bajo su cuenta</li>
+                <li>Notificar inmediatamente cualquier uso no autorizado</li>
+            </ul>
+            
+            <h3>4. Uso Aceptable</h3>
+            <p>Usted se compromete a utilizar ProfeGo únicamente para fines legales y educativos. Está prohibido:</p>
+            <ul>
+                <li>Subir contenido ilegal, ofensivo o que infrinja derechos de terceros</li>
+                <li>Intentar acceder sin autorización a sistemas o redes</li>
+                <li>Distribuir malware, virus o código malicioso</li>
+                <li>Realizar ingeniería inversa del servicio</li>
+            </ul>
+            
+            <h3>5. Propiedad Intelectual</h3>
+            <p>Usted conserva todos los derechos sobre el contenido que sube a ProfeGo. Al utilizar nuestro servicio, nos otorga una licencia limitada para procesar, almacenar y mostrar su contenido.</p>
+            
+            <h3>6. Limitación de Responsabilidad</h3>
+            <p>ProfeGo se proporciona "tal cual" sin garantías de ningún tipo. No nos hacemos responsables de pérdida de datos, interrupciones del servicio o daños derivados del uso de la plataforma.</p>
+            
+            <h3>7. Modificaciones del Servicio</h3>
+            <p>Nos reservamos el derecho de modificar o discontinuar el servicio en cualquier momento, con o sin previo aviso.</p>
+            
+            <h3>8. Terminación</h3>
+            <p>Podemos suspender o terminar su acceso a ProfeGo si viola estos términos o por cualquier otra razón a nuestra discreción.</p>
+            
+            <h3>9. Ley Aplicable</h3>
+            <p>Estos términos se regirán por las leyes de México, sin tener en cuenta sus conflictos de disposiciones legales.</p>
+            
+            <h3>10. Contacto</h3>
+            <p>Si tiene preguntas sobre estos Términos y Condiciones, puede contactarnos en: <strong>soporte@profego.com</strong></p>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-close-btn" id="close-terms">Aceptar y Cerrar</button>
+        </div>
+    </div>
+
+    <!-- Modal de Política de Privacidad -->
+    <div class="terms-modal" id="privacy-modal">
+        <div class="modal-header">
+            <h2>Política de Privacidad</h2>
+        </div>
+        <div class="terms-modal-content">
+            <p><strong>Última actualización:</strong> Octubre 2025</p>
+            
+            <h3>1. Información que Recopilamos</h3>
+            <p>En ProfeGo recopilamos y procesamos la siguiente información:</p>
+            <ul>
+                <li><strong>Información de cuenta:</strong> correo electrónico, nombre, contraseña (encriptada)</li>
+                <li><strong>Archivos y documentos:</strong> archivos que usted sube voluntariamente a la plataforma</li>
+                <li><strong>Datos de uso:</strong> información sobre cómo utiliza el servicio</li>
+                <li><strong>Información técnica:</strong> dirección IP, tipo de navegador, sistema operativo</li>
+            </ul>
+            
+            <h3>2. Cómo Utilizamos su Información</h3>
+            <p>Utilizamos la información recopilada para:</p>
+            <ul>
+                <li>Proporcionar y mejorar nuestros servicios</li>
+                <li>Procesar sus documentos mediante OCR y otras tecnologías</li>
+                <li>Comunicarnos con usted sobre actualizaciones del servicio</li>
+                <li>Garantizar la seguridad y prevenir fraudes</li>
+                <li>Cumplir con obligaciones legales</li>
+            </ul>
+            
+            <h3>3. Almacenamiento y Seguridad de Datos</h3>
+            <p>Implementamos medidas de seguridad técnicas y organizativas para proteger su información:</p>
+            <ul>
+                <li>Encriptación de datos en tránsito y en reposo</li>
+                <li>Acceso restringido a datos personales</li>
+                <li>Auditorías de seguridad regulares</li>
+                <li>Copias de seguridad automáticas</li>
+            </ul>
+            
+            <h3>4. Compartir Información</h3>
+            <p>No vendemos ni alquilamos su información personal a terceros. Podemos compartir datos con:</p>
+            <ul>
+                <li>Proveedores de servicios que nos ayudan a operar la plataforma</li>
+                <li>Autoridades legales cuando sea requerido por ley</li>
+            </ul>
+            
+            <h3>5. Sus Derechos</h3>
+            <p>Usted tiene derecho a:</p>
+            <ul>
+                <li>Acceder a su información personal</li>
+                <li>Rectificar datos inexactos</li>
+                <li>Solicitar la eliminación de su cuenta y datos</li>
+                <li>Exportar sus datos en formato legible</li>
+                <li>Oponerse al procesamiento de sus datos</li>
+            </ul>
+            
+            <h3>6. Cookies y Tecnologías de Seguimiento</h3>
+            <p>Utilizamos cookies y tecnologías similares para mejorar su experiencia. Puede configurar su navegador para rechazar cookies, aunque esto puede afectar la funcionalidad del servicio.</p>
+            
+            <h3>7. Retención de Datos</h3>
+            <p>Conservamos su información personal mientras su cuenta esté activa o según sea necesario para cumplir con obligaciones legales. Los archivos eliminados se borran permanentemente después de 30 días.</p>
+            
+            <h3>8. Transferencias Internacionales</h3>
+            <p>Sus datos pueden ser transferidos y procesados en servidores ubicados fuera de su país de residencia. Garantizamos el mismo nivel de protección en todas las jurisdicciones.</p>
+            
+            <h3>9. Menores de Edad</h3>
+            <p>ProfeGo no está destinado a menores de 18 años. No recopilamos intencionalmente información de menores.</p>
+            
+            <h3>10. Cambios a esta Política</h3>
+            <p>Podemos actualizar esta Política de Privacidad periódicamente. Le notificaremos sobre cambios significativos por correo electrónico o mediante un aviso en la plataforma.</p>
+            
+            <h3>11. Contacto</h3>
+            <p>Para ejercer sus derechos o realizar consultas sobre privacidad, contáctenos en: <strong>privacidad@profego.com</strong></p>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-close-btn" id="close-privacy">Aceptar y Cerrar</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="shared.js"></script>
+    <script src="login-script.js"></script>
+</body>
+</html>

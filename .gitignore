@@ -1,0 +1,98 @@
+# ===================================
+# ARCHIVOS SENSIBLES (CRÍTICO)
+# ===================================
+.env
+*.env
+.env.local
+.env.production
+.env.*.local
+
+# Credenciales de Google Cloud (NO SUBIR)
+*service-account-key.json
+*Service-Account-Key.json
+Google_Cloud_Key.json
+*-key.json
+credentials.json
+
+# Excepción: permitir package.json
+!package.json
+!package-lock.json
+
+# ===================================
+# CARPETAS DE DATOS DE USUARIOS
+# ===================================
+Documents/
+ProfeGo_Biblioteca/
+Carpeta_Archivos/
+
+# ===================================
+# PYTHON
+# ===================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+
+# ===================================
+# JUPYTER NOTEBOOK
+# ===================================
+.ipynb_checkpoints
+
+# ===================================
+# IDEs
+# ===================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.vs/
+
+# ===================================
+# LOGS Y TEMPORALES
+# ===================================
+*.log
+logs/
+pip-log.txt
+pip-delete-this-directory.txt
+*.tmp
+*.temp
+*.bak
+
+# ===================================
+# SISTEMA OPERATIVO
+# ===================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ===================================
+# TESTS Y COVERAGE
+# ===================================
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# ===================================
+# OTROS
+# ===================================
+*.sqlite
+*.db
+node_modules/
