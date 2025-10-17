@@ -1,42 +1,64 @@
-# ProfeGo - Sistema de Gestión de Archivos con OCR
+# 🎓 ProfeGo - Sistema de Generación de Planes de Estudio con IA
 
-Sistema completo de gestión de archivos con procesamiento OCR, almacenamiento en Google Cloud Storage y autenticación con Firebase.
+Sistema completo para generar planes de estudio personalizados usando Gemini AI, con almacenamiento en Google Cloud Storage.
 
-## 🚀 Características
+## 🌟 Características
 
-- ✅ Autenticación de usuarios con Firebase Auth
-- ☁️ Almacenamiento en Google Cloud Storage
-- 📄 Procesamiento OCR de múltiples formatos (PDF, imágenes, Word, Excel, etc.)
-- 📁 Estructura de carpetas por usuario
-- 🔒 Gestión segura de archivos
+- ✅ **Generación automática de planes** con Gemini AI
+- 📚 **Personalización** según diagnóstico del grupo (opcional)
+- ☁️ **Almacenamiento en GCS** para archivos y planes generados
+- 📄 **OCR integrado** para extraer texto de PDFs, imágenes, Word, etc.
+- 🔐 **Autenticación** con Firebase
+- 📱 **Responsive** y fácil de usar
+
+---
 
 ## 📋 Requisitos Previos
 
-- Python 3.12.8
-- Cuenta de Google Cloud Platform
-- Proyecto de Firebase
-- Tesseract OCR instalado
+1. **Python 3.9+**
+2. **Node.js** (opcional, para frontend)
+3. **Tesseract OCR** instalado en el sistema
+4. **Cuenta de Google Cloud** (GCS bucket)
+5. **Cuenta de Firebase** (autenticación)
+6. **API Key de Gemini** (gratis)
 
-## 🛠️ Instalación
+---
 
-### 1. Clonar el repositorio e instalar dependencias
+## 🚀 Instalación Rápida
+
+### 1️⃣ Clonar/Descargar el proyecto
 
 ```bash
-# Instalar las dependencias de Python
-pip install fastapi uvicorn python-dotenv
-pip install pyrebase4 google-cloud-storage
-pip install opencv-python pytesseract
-pip install python-docx PyPDF2 pandas openpyxl
+# Si tienes git
+git clone tu-repositorio
+cd profego
+
+# O descomprime el ZIP descargado
 ```
 
-### 2. Instalar Tesseract OCR
+### 2️⃣ Crear entorno virtual
+
+```bash
+# Windows
+python -m venv venv
+venv\Scripts\activate
+
+# Linux/Mac
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### 3️⃣ Instalar dependencias
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4️⃣ Instalar Tesseract OCR
 
 **Windows:**
-```bash
-# Descargar desde: https://github.com/UB-Mannheim/tesseract/wiki
-# Agregar al PATH o configurar en PruebaOcr.py:
-# pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
-```
+- Descargar: https://github.com/UB-Mannheim/tesseract/wiki
+- Instalar y agregar al PATH
 
 **Linux:**
 ```bash
@@ -44,247 +66,214 @@ sudo apt-get install tesseract-ocr
 sudo apt-get install tesseract-ocr-spa  # Para español
 ```
 
-**macOS:**
+**Mac:**
 ```bash
 brew install tesseract
-brew install tesseract-lang  # Para idiomas adicionales
+brew install tesseract-lang  # Para español
 ```
 
-### 3. Configurar Google Cloud Storage
-
-#### a) Crear Service Account
-
-1. Ve a [Google Cloud Console](https://console.cloud.google.com)
-2. Selecciona tu proyecto o crea uno nuevo
-3. Navega a **IAM & Admin** > **Service Accounts**
-4. Clic en **Create Service Account**
-5. Asigna los siguientes roles:
-   - `Storage Object Admin`
-   - `Storage Object Creator`
-   - `Storage Object Viewer`
-6. Crea una clave JSON y descárgala
-
-#### b) Crear el Bucket
-
-```bash
-# Opción 1: Desde la consola web
-# Ve a Cloud Storage > Buckets > Create Bucket
-
-# Opción 2: Desde la línea de comandos
-gsutil mb -p TU_PROJECT_ID -c STANDARD -l us-central1 gs://bucket-profe-go
-```
-
-#### c) Configurar credenciales
-
-**Windows (PowerShell):**
-```powershell
-$env:GOOGLE_APPLICATION_CREDENTIALS="C:\ruta\a\tu-service-account-key.json"
-
-# Para hacerlo permanente:
-[System.Environment]::SetEnvironmentVariable('GOOGLE_APPLICATION_CREDENTIALS', 'C:\ruta\a\tu-service-account-key.json', 'User')
-```
-
-**Linux/macOS:**
-```bash
-export GOOGLE_APPLICATION_CREDENTIALS="/ruta/a/tu-service-account-key.json"
-
-# Para hacerlo permanente, agregar a ~/.bashrc o ~/.zshrc:
-echo 'export GOOGLE_APPLICATION_CREDENTIALS="/ruta/a/tu-service-account-key.json"' >> ~/.bashrc
-source ~/.bashrc
-```
-
-### 4. Configurar Firebase (Solo para Auth)
-
-1. Ve a [Firebase Console](https://console.firebase.google.com)
-2. Crea un proyecto o selecciona uno existente
-3. Ve a **Project Settings** > **General**
-4. Copia la configuración de tu web app
-5. Habilita **Authentication** > **Email/Password**
-
-### 5. Crear archivo .env
+### 5️⃣ Configurar variables de entorno
 
 Crea un archivo `.env` en la raíz del proyecto:
 
 ```env
-# Firebase (Auth)
-FIREBASE_API_KEY=tu_api_key
+# Firebase
+FIREBASE_API_KEY=tu_firebase_api_key
 FIREBASE_AUTH_DOMAIN=tu_proyecto.firebaseapp.com
 FIREBASE_PROJECT_ID=tu_proyecto_id
 FIREBASE_STORAGE_BUCKET=tu_proyecto.appspot.com
-FIREBASE_MESSAGING_SENDER_ID=123456789
-FIREBASE_APP_ID=1:123456789:web:abc123
+FIREBASE_MESSAGING_SENDER_ID=tu_sender_id
+FIREBASE_APP_ID=tu_app_id
 FIREBASE_DATABASE_URL=https://tu_proyecto.firebaseio.com
 
 # Google Cloud Storage
 GCS_BUCKET_NAME=bucket-profe-go
-GOOGLE_APPLICATION_CREDENTIALS=ruta/a/tu-service-account-key.json
+GOOGLE_APPLICATION_CREDENTIALS=ruta/a/credenciales.json
+
+# Gemini AI
+GEMINI_API_KEY=tu_gemini_api_key
 ```
 
-## 📂 Estructura del Proyecto
+### 6️⃣ Configurar Google Cloud Storage
 
-```
-ProfeGo/
-├── main.py                          # API principal con FastAPI
-├── gcs_storage.py                   # Módulo de Google Cloud Storage
-├── PruebaOcr.py                     # Módulo de procesamiento OCR
-├── bucket.py                        # Ejemplos de uso de GCS
-├── .env                             # Variables de entorno (NO SUBIR A GIT)
-├── .env.example                     # Ejemplo de variables
-├── frontend/                        # Archivos del frontend
-│   └── index.html
-└── tu-service-account-key.json      # Credenciales GCS (NO SUBIR A GIT)
-```
+1. Ir a [Google Cloud Console](https://console.cloud.google.com)
+2. Crear un bucket (ejemplo: `bucket-profe-go`)
+3. Descargar credenciales JSON de una cuenta de servicio
+4. Colocar el archivo en la raíz y actualizar `.env`
 
-## 🚀 Ejecutar el Proyecto
+### 7️⃣ Obtener API Key de Gemini
+
+1. Ir a [Google AI Studio](https://makersuite.google.com/app/apikey)
+2. Crear/copiar tu API key (es GRATIS)
+3. Agregar a `.env` como `GEMINI_API_KEY`
+
+### 8️⃣ Ejecutar el servidor
 
 ```bash
-# Ejecutar el servidor
 python main.py
-
-# O con uvicorn directamente
-uvicorn main:app --reload --host 127.0.0.1 --port 8000
 ```
 
 El servidor estará disponible en:
-- **Frontend:** http://127.0.0.1:8000
-- **API Docs:** http://127.0.0.1:8000/docs
-- **Health Check:** http://127.0.0.1:8000/health
+- 🌐 Frontend: http://127.0.0.1:8000
+- 📖 Docs API: http://127.0.0.1:8000/docs
 
-## 📚 Uso de la API
+---
 
-### Autenticación
+## 📖 Cómo Usar
 
-**Registrar usuario:**
-```bash
-curl -X POST "http://127.0.0.1:8000/api/auth/register" \
-  -H "Content-Type: application/json" \
-  -d '{"email": "usuario@ejemplo.com", "password": "password123"}'
-```
+### Generar un Plan de Estudio
 
-**Iniciar sesión:**
-```bash
-curl -X POST "http://127.0.0.1:8000/api/auth/login" \
-  -H "Content-Type: application/json" \
-  -d '{"email": "usuario@ejemplo.com", "password": "password123"}'
-```
+1. **Iniciar sesión** en ProfeGo
+2. Ir a la sección **ARCHIVOS**
+3. Presionar **"AÑADIR PLAN"**
+4. Subir archivos:
+   - **Plan de estudios** (obligatorio): PDF, Word, imagen con el plan oficial
+   - **Diagnóstico** (opcional): Documento con características del grupo
+5. Presionar **"Procesar y Generar Plan"**
+6. Esperar 1-3 minutos mientras la IA procesa
+7. Ver el plan generado en **CONSULTA**
 
-### Gestión de Archivos
+### Visualizar Planes
 
-**Subir archivo:**
-```bash
-curl -X POST "http://127.0.0.1:8000/api/files/upload?user_email=usuario@ejemplo.com" \
-  -F "files=@documento.pdf"
-```
+1. Ir a **CONSULTA**
+2. Ver todos tus planes generados
+3. Hacer clic en **👁️ Ver** para ver detalles
+4. Expandir módulos para ver todo el contenido
+5. Descargar como JSON si necesitas
 
-**Listar archivos:**
-```bash
-curl "http://127.0.0.1:8000/api/files/list?user_email=usuario@ejemplo.com"
-```
+---
 
-**Eliminar archivo:**
-```bash
-curl -X DELETE "http://127.0.0.1:8000/api/files/delete/original/documento.pdf?user_email=usuario@ejemplo.com"
-```
-
-## 🗂️ Estructura en GCS
-
-Los archivos se organizan así en el bucket:
+## 🏗️ Estructura del Proyecto
 
 ```
-bucket-profe-go/
-└── Carpeta_Archivos/
-    ├── usuario_ejemplo_com/
-    │   ├── ARCHIVOS_SUBIDOS/
-    │   │   ├── documento1.pdf
-    │   │   └── imagen1.jpg
-    │   └── ARCHIVOS_DESCARGA/
-    │       ├── documento1_procesado.txt
-    │       └── imagen1_procesado.txt
-    └── otro_usuario_com/
-        ├── ARCHIVOS_SUBIDOS/
-        └── ARCHIVOS_DESCARGA/
+profego/
+├── frontend/
+│   ├── index.html
+│   ├── login.html
+│   ├── menu.html
+│   ├── styles.css
+│   ├── shared.js
+│   ├── login-script.js
+│   └── menu-script.js
+├── main.py              # API FastAPI
+├── gemini_service.py    # Servicio de Gemini AI
+├── gcs_storage.py       # Gestión de GCS
+├── PruebaOcr.py        # Procesamiento OCR
+├── requirements.txt     # Dependencias Python
+├── .env                 # Variables de entorno
+└── README.md
 ```
 
-## 🔧 Verificar Configuración
+---
 
-### Probar conexión con GCS
+## 🔧 Estructura de un Plan Generado
 
-```python
-# Ejecutar bucket.py para probar la conexión
-python bucket.py
+```json
+{
+  "plan_id": "plan_abc123_1234567890",
+  "nombre_plan": "Lenguaje y Comunicación - 3° Primaria",
+  "grado": "3° Primaria",
+  "materia": "Lenguaje y Comunicación",
+  "num_modulos": 5,
+  "modulos": [
+    {
+      "numero": 1,
+      "nombre": "Módulo 1",
+      "tema": "...",
+      "objetivo": "...",
+      "planteamiento": "...",
+      "materiales": "...",
+      "tiempo": "...",
+      "participacion": "...",
+      "ejes_articulares": "..."
+    }
+  ],
+  "usuario": "profesor@ejemplo.com",
+  "fecha_generacion": "2025-01-15T10:30:00",
+  "tiene_diagnostico": true,
+  "generado_con": "Gemini AI"
+}
 ```
 
-### Probar el módulo de storage
-
-```python
-# Ejecutar gcs_storage.py
-python gcs_storage.py
-```
-
-## ⚠️ Notas Importantes
-
-1. **Nunca subas a Git:**
-   - Archivo `.env`
-   - Archivo `*-service-account-key.json`
-   - Carpeta `Documents/ProfeGo_Biblioteca/`
-
-2. **Agregar al .gitignore:**
-```gitignore
-.env
-*-service-account-key.json
-*.json
-Documents/
-__pycache__/
-*.pyc
-```
-
-3. **Seguridad:**
-   - En producción, implementa autenticación real con tokens
-   - Valida permisos de usuarios
-   - Usa HTTPS
-   - Configura CORS correctamente
-
-4. **Costos:**
-   - GCS tiene costos por almacenamiento y transferencia
-   - Monitorea el uso desde [GCP Console](https://console.cloud.google.com)
+---
 
 ## 🐛 Solución de Problemas
 
-### Error: "Could not automatically determine credentials"
+### Error: "Gemini API key no configurada"
+✅ Verifica que `GEMINI_API_KEY` esté en tu `.env`
 
-```bash
-# Verificar que la variable esté configurada
-echo $GOOGLE_APPLICATION_CREDENTIALS  # Linux/macOS
-echo %GOOGLE_APPLICATION_CREDENTIALS%  # Windows CMD
-$env:GOOGLE_APPLICATION_CREDENTIALS    # Windows PowerShell
-```
+### Error: "No se pudo extraer texto del archivo"
+✅ Verifica que Tesseract esté instalado correctamente
+✅ Prueba con un archivo más simple primero
 
-### Error: "Bucket does not exist"
+### Error: "Bucket not found"
+✅ Crea el bucket en Google Cloud Console
+✅ Verifica permisos de la cuenta de servicio
 
-```bash
-# Verificar que el bucket existe
-gsutil ls gs://bucket-profe-go
+### El plan generado no tiene sentido
+✅ Asegúrate de que el plan de estudios tenga texto claro
+✅ Si es una imagen, que tenga buena calidad/resolución
+✅ Prueba agregando un diagnóstico para más contexto
 
-# O crear el bucket
-gsutil mb gs://bucket-profe-go
-```
+---
 
-### Error de Tesseract
+## 📊 Límites y Restricciones
 
-```bash
-# Verificar instalación
-tesseract --version
+| Concepto | Límite |
+|----------|--------|
+| Tamaño máximo de archivo | 80 MB |
+| Planes por hora | 5 (rate limit) |
+| Archivos subidos por minuto | 10 |
+| Módulos por plan | 3-8 (según contenido) |
+| Tiempo de procesamiento | 1-3 minutos |
 
-# Si no está en el PATH, configurar en PruebaOcr.py
-```
+---
 
-## 📞 Soporte
+## 🔒 Seguridad
 
-Para problemas o preguntas, revisa:
-- [Documentación de GCS](https://cloud.google.com/storage/docs)
-- [Documentación de Firebase](https://firebase.google.com/docs)
-- [FastAPI Docs](https://fastapi.tiangolo.com)
+- ✅ Autenticación con Firebase
+- ✅ Archivos almacenados por usuario
+- ✅ Tokens JWT para API
+- ✅ Rate limiting activo
+- ✅ Validación de tipos de archivo
 
-## 📄 Licencia
+---
 
-Este proyecto es para uso educativo.
+## 🚀 Deployment en Render/Railway
+
+1. Crear nuevo servicio
+2. Conectar repositorio
+3. Configurar variables de entorno
+4. Para GCS, usar `GOOGLE_APPLICATION_CREDENTIALS_JSON` con el JSON completo
+5. Deploy
+
+---
+
+## 📝 Notas Importantes
+
+- **Gemini es GRATIS** hasta ciertos límites (muy generosos)
+- Los planes se guardan en GCS como archivos JSON
+- El diagnóstico es OPCIONAL pero mejora mucho la personalización
+- Puedes generar planes sin diagnóstico para uso genérico
+
+---
+
+## 🤝 Contribuir
+
+¿Tienes ideas o mejoras? ¡Contribuye al proyecto!
+
+---
+
+## 📧 Soporte
+
+Email: soporteprofego@gmail.com
+
+---
+
+## 📜 Licencia
+
+Proyecto educativo para uso personal y académico.
+
+---
+
+**¡Disfruta generando planes de estudio con IA! 🎉**

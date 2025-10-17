@@ -1,4 +1,4 @@
-// ===== SCRIPT PARA MENU.HTML - VERSIÓN PRODUCCIÓN =====
+// ===== SCRIPT PARA MENU.HTML - VERSIÓN CON GENERACIÓN DE PLANES IA =====
 
 // ===== ELEMENTOS DEL DOM =====
 const logoutBtn = document.getElementById('logout-btn');
@@ -9,14 +9,14 @@ const filesGallery = document.getElementById('files-gallery');
 const navButtons = {
     inicio: document.getElementById('nav-inicio'),
     archivos: document.getElementById('nav-archivos'),
-    planes: document.getElementById('nav-planes'),
+    consulta: document.getElementById('nav-consulta'),
     acerca: document.getElementById('nav-acerca')
 };
 
 const contentSections = {
     inicio: document.getElementById('inicio-content'),
     archivos: document.getElementById('archivos-content'),
-    planes: document.getElementById('planes-content'),
+    consulta: document.getElementById('consulta-content'),
     acerca: document.getElementById('acerca-content')
 };
 
@@ -31,48 +31,42 @@ const downloadPreviewBtn = document.getElementById('download-preview-btn');
 
 let currentPreviewFile = null;
 
-// Elementos Plan de Estudio
-const createPlanBtn = document.getElementById('create-plan-btn');
-const planModal = document.getElementById('plan-modal');
-const closePlanModal = document.getElementById('close-plan-modal');
-const cancelPlanBtn = document.getElementById('cancel-plan-btn');
-const savePlanBtn = document.getElementById('save-plan-btn');
-const addModuleBtn = document.getElementById('add-module-btn');
-const modulesContainer = document.getElementById('modules-container');
+// NUEVO: Elementos para generación de planes
+const generatePlanBtn = document.getElementById('generate-plan-btn');
+const generatePlanModal = document.getElementById('generate-plan-modal');
+const closeGeneratePlanModal = document.getElementById('close-generate-plan-modal');
+const cancelGeneratePlanBtn = document.getElementById('cancel-generate-plan-btn');
+const processPlanBtn = document.getElementById('process-plan-btn');
+const planFileInput = document.getElementById('plan-file-input');
+const diagnosticoFileInput = document.getElementById('diagnostico-file-input');
+const planFileSelected = document.getElementById('plan-file-selected');
+const diagnosticoFileSelected = document.getElementById('diagnostico-file-selected');
 const planesList = document.getElementById('planes-list');
-const planNombreInput = document.getElementById('plan-nombre');
+const consultaStats = document.getElementById('consulta-stats');
 
-// Modal selector de archivos
-const fileSelectorModal = document.getElementById('file-selector-modal');
-const closeFileSelector = document.getElementById('close-file-selector');
-const fileSelectorList = document.getElementById('file-selector-list');
+// Modal detalle de plan
+const planDetailModal = document.getElementById('plan-detail-modal');
+const closePlanDetailModal = document.getElementById('close-plan-detail-modal');
+const planDetailTitle = document.getElementById('plan-detail-title');
+const planDetailContent = document.getElementById('plan-detail-content');
 
-// Variables globales para planes
-let currentModuleIndex = 0;
-let currentActivityElement = null;
-let planesDeEstudio = [];
+// Variables globales
+let planesGenerados = [];
 let currentPage = 1;
-const itemsPerPage = 3;
+const itemsPerPage = 5;
 
 // ===== VERIFICAR AUTENTICACIÓN AL CARGAR =====
 document.addEventListener('DOMContentLoaded', function() {
-    // Verificar si hay sesión activa
     if (!loadSession()) {
         window.location.href = 'login.html';
         return;
     }
     
-    // Mostrar información del usuario
     userInfo.textContent = `👋 Hola, ${currentUser}`;
     
-    // Cargar planes guardados
-    loadPlanes();
-    
-    // Iniciar en la sección de inicio
     switchToSection('inicio');
-    
-    // Configurar event listeners
     setupEventListeners();
+    loadPlanes();
 });
 
 // ===== NAVEGACIÓN =====
@@ -86,14 +80,12 @@ function switchToSection(sectionName) {
         contentSections[key].classList.toggle('hidden', key !== sectionName);
     });
     
-    // Cargar archivos solo si vamos a esa sección
     if (sectionName === 'archivos' && currentToken) {
         loadFiles();
     }
     
-    // Cargar planes si vamos a esa sección
-    if (sectionName === 'planes') {
-        displayPlanes();
+    if (sectionName === 'consulta') {
+        loadPlanes();
     }
 }
 
@@ -172,14 +164,14 @@ function displayFiles(files) {
         filesGallery.innerHTML = `
             <div class="empty-state">
                 <h3>No hay archivos aún</h3>
-                <p>Usa el botón 'Subir archivos' para agregar tus documentos</p>
+                <p>Usa el botón 'Subir archivos adicionales' para agregar documentos</p>
             </div>
         `;
         return;
     }
     
     const originalFiles = files.filter(file => file.category === 'original');
-    const processedFiles = files.filter(file => file.category === 'procesado');
+    const processedFiles = files.filter(file => file.category === 'procesado' && !file.name.startsWith('plan_'));
     
     if (originalFiles.length > 0) {
         const originalSection = document.createElement('div');
@@ -217,11 +209,10 @@ function createFileCard(file) {
         const fileType = file.type.toLowerCase();
         if (fileType.includes('pdf')) icon = '📄';
         else if (fileType.includes('imagen')) icon = '🖼️';
-        else if (fileType.includes('word')) icon = '📝';
+        else if (fileType.includes('word')) icon = '📘';
         else if (fileType.includes('excel')) icon = '📊';
     }
     
-    // Escapar el nombre del archivo para evitar problemas con comillas
     const escapedName = file.name.replace(/'/g, "\\'");
     
     card.innerHTML = `
@@ -236,13 +227,13 @@ function createFileCard(file) {
             </div>
         </div>
         <div class="file-actions">
-            <button class="preview-btn" onclick="openFilePreview('${file.category}', '${escapedName}')" title="Vista previa de ${file.name}">
+            <button class="preview-btn" onclick="openFilePreview('${file.category}', '${escapedName}')" title="Vista previa">
                 👁️
             </button>
-            <button class="download-btn" onclick="downloadFileAction('${file.category}', '${escapedName}')" title="Descargar ${file.name}">
+            <button class="download-btn" onclick="downloadFileAction('${file.category}', '${escapedName}')" title="Descargar">
                 📥
             </button>
-            <button class="delete-btn" onclick="confirmDeleteFile('${file.category}', '${escapedName}')" title="Eliminar ${file.name}">
+            <button class="delete-btn" onclick="confirmDeleteFile('${file.category}', '${escapedName}')" title="Eliminar">
                 🗑️
             </button>
         </div>
@@ -276,80 +267,192 @@ function confirmDeleteFile(category, filename) {
     );
 }
 
-// ===== GESTIÓN DE PLANES DE ESTUDIO =====
+// ===== GENERACIÓN DE PLANES CON IA =====
 
-function loadPlanes() {
-    const stored = localStorage.getItem(`planesDeEstudio_${currentUser}`);
-    if (stored) {
-        planesDeEstudio = JSON.parse(stored);
+function openGeneratePlanModal() {
+    generatePlanModal.classList.add('active');
+    resetGeneratePlanModal();
+}
+
+function closeGeneratePlanModalFn() {
+    generatePlanModal.classList.remove('active');
+    resetGeneratePlanModal();
+}
+
+function resetGeneratePlanModal() {
+    planFileInput.value = '';
+    diagnosticoFileInput.value = '';
+    planFileSelected.innerHTML = '<span class="no-file-text">Ningún archivo seleccionado</span>';
+    diagnosticoFileSelected.innerHTML = '<span class="no-file-text">Ningún archivo seleccionado (opcional)</span>';
+    processPlanBtn.disabled = true;
+}
+
+function updateFileDisplay(inputElement, displayElement) {
+    const file = inputElement.files[0];
+    
+    if (file) {
+        const icon = getFileIconByName(file.name);
+        const size = (file.size / (1024 * 1024)).toFixed(2);
+        
+        displayElement.innerHTML = `
+            <span class="file-icon">${icon}</span>
+            <span class="file-name-text">${file.name}</span>
+            <span class="file-size-text">(${size} MB)</span>
+        `;
+    } else {
+        const isOptional = inputElement === diagnosticoFileInput;
+        displayElement.innerHTML = `<span class="no-file-text">Ningún archivo seleccionado${isOptional ? ' (opcional)' : ''}</span>`;
+    }
+    
+    // Habilitar botón si al menos el plan está seleccionado
+    processPlanBtn.disabled = !planFileInput.files[0];
+}
+
+function getFileIconByName(filename) {
+    const ext = filename.split('.').pop().toLowerCase();
+    const icons = {
+        'pdf': '📄',
+        'doc': '📘',
+        'docx': '📘',
+        'txt': '📄',
+        'jpg': '🖼️',
+        'jpeg': '🖼️',
+        'png': '🖼️'
+    };
+    return icons[ext] || '📎';
+}
+
+async function processPlan() {
+    try {
+        const planFile = planFileInput.files[0];
+        const diagnosticoFile = diagnosticoFileInput.files[0];
+        
+        if (!planFile) {
+            showMessage('Debes seleccionar el archivo del plan de estudios', 'error');
+            return;
+        }
+        
+        // Validar tamaños
+        const maxSize = 80 * 1024 * 1024; // 80MB
+        if (planFile.size > maxSize) {
+            showMessage('El plan de estudios excede el tamaño máximo de 80MB', 'error');
+            return;
+        }
+        
+        if (diagnosticoFile && diagnosticoFile.size > maxSize) {
+            showMessage('El diagnóstico excede el tamaño máximo de 80MB', 'error');
+            return;
+        }
+        
+        // Cerrar modal y mostrar loading
+        closeGeneratePlanModalFn();
+        showLoadingWithProgress('Procesando archivos con IA...', 'Esto puede tardar 1-3 minutos');
+        
+        // Crear FormData
+        const formData = new FormData();
+        formData.append('plan_file', planFile);
+        if (diagnosticoFile) {
+            formData.append('diagnostico_file', diagnosticoFile);
+        }
+        
+        // Enviar a la API
+        const response = await fetch(`${API_BASE}/plans/generate`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${currentToken}`
+            },
+            body: formData
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || 'Error generando plan');
+        }
+        
+        const result = await response.json();
+        
+        hideLoading();
+        
+        if (result.success) {
+            showMessage(
+                `Plan generado exitosamente: "${result.plan_data.nombre_plan}"`,
+                'success'
+            );
+            
+            // Recargar planes y cambiar a sección consulta
+            await loadPlanes();
+            switchToSection('consulta');
+            
+            // Mostrar el plan recién creado
+            setTimeout(() => {
+                showPlanDetail(result.plan_data.plan_id);
+            }, 500);
+        } else {
+            showMessage(result.error || 'Error generando plan', 'error');
+        }
+        
+    } catch (error) {
+        hideLoading();
+        console.error('Error procesando plan:', error);
+        showMessage(`Error: ${error.message}`, 'error');
     }
 }
 
-function savePlanesToStorage() {
-    // Guardar planes por usuario
-    localStorage.setItem(`planesDeEstudio_${currentUser}`, JSON.stringify(planesDeEstudio));
+// ===== CARGA Y VISUALIZACIÓN DE PLANES =====
+
+async function loadPlanes() {
+    try {
+        if (!currentToken) {
+            planesList.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">🔒</div>
+                    <h3>Inicia sesión para ver tus planes</h3>
+                </div>
+            `;
+            return;
+        }
+        
+        const response = await apiRequest('/plans/list');
+        
+        if (response.success) {
+            planesGenerados = response.planes || [];
+            displayPlanes();
+            updateConsultaStats();
+        } else {
+            throw new Error('Error cargando planes');
+        }
+        
+    } catch (error) {
+        console.error('Error cargando planes:', error);
+        planesList.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">⚠️</div>
+                <h3>Error cargando planes</h3>
+                <p>${error.message}</p>
+            </div>
+        `;
+    }
 }
 
 function displayPlanes() {
-    if (planesDeEstudio.length === 0) {
+    if (planesGenerados.length === 0) {
         planesList.innerHTML = `
             <div class="empty-state">
-                <p>No hay planes de estudio para mostrar.</p>
-                <p style="font-size: 12px; margin-top: 10px;">Crea tu primer plan usando el botón "Crear Plan de Estudio"</p>
+                <div class="empty-icon">📋</div>
+                <h3>No hay planes generados aún</h3>
+                <p>Ve a la sección ARCHIVOS y presiona "AÑADIR PLAN" para comenzar</p>
             </div>
         `;
         return;
     }
     
     // Calcular paginación
-    const totalPages = Math.ceil(planesDeEstudio.length / itemsPerPage);
+    const totalPages = Math.ceil(planesGenerados.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
+    const currentPlans = planesGenerados.slice(startIndex, endIndex);
     
-    // Obtener planes para la página actual (invertidos para mostrar los más recientes primero)
-    const reversedPlanes = [...planesDeEstudio].reverse();
-    const currentPlans = reversedPlanes.slice(startIndex, endIndex);
-    
-    // Generar HTML de los planes
-    planesList.innerHTML = currentPlans.map((plan, index) => {
-        const realIndex = planesDeEstudio.length - 1 - (startIndex + index);
-        return `
-            <div class="plan-card">
-                <div class="plan-card-header" onclick="togglePlanCard(${realIndex})">
-                    <div class="plan-card-title">
-                        <h4>${plan.nombre}</h4>
-                        <span class="plan-card-arrow">▼</span>
-                    </div>
-                    <div class="plan-card-meta">
-                        <span class="plan-date">📅 ${new Date(plan.fecha).toLocaleDateString()}</span>
-                        <span class="plan-modules">📚 ${plan.modulos.length} módulos</span>
-                    </div>
-                </div>
-                <div class="plan-card-body" id="plan-body-${realIndex}">
-                    ${plan.modulos.map((modulo, modIndex) => `
-                        <div class="plan-module-item">
-                            <div class="module-number">Módulo ${modIndex + 1}</div>
-                            <div class="module-details">
-                                <div class="module-objective">
-                                    <strong>Objetivo:</strong>
-                                    <p>${modulo.objetivo}</p>
-                                </div>
-                                <div class="module-activity">
-                                    <strong>Actividad:</strong>
-                                    <p>📄 ${modulo.actividad}</p>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('')}
-                    <div class="plan-card-actions">
-                        <button class="btn btn-danger btn-sm" onclick="deletePlan(${realIndex})">
-                            🗑️ Eliminar Plan
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-    }).join('');
+    planesList.innerHTML = currentPlans.map(plan => createPlanCard(plan)).join('');
     
     // Agregar paginación si hay más de una página
     if (totalPages > 1) {
@@ -358,9 +461,7 @@ function displayPlanes() {
                 <button class="pagination-btn" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
                     ← Anterior
                 </button>
-                <div class="pagination-numbers">
-                    ${generatePaginationNumbers(totalPages)}
-                </div>
+                <span class="pagination-info">Página ${currentPage} de ${totalPages}</span>
                 <button class="pagination-btn" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
                     Siguiente →
                 </button>
@@ -370,20 +471,506 @@ function displayPlanes() {
     }
 }
 
-function generatePaginationNumbers(totalPages) {
-    let html = '';
-    for (let i = 1; i <= totalPages; i++) {
-        html += `
-            <button class="pagination-number ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">
-                ${i}
-            </button>
+function createPlanCard(plan) {
+    const fecha = new Date(plan.fecha_generacion).toLocaleDateString('es-MX', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+    
+    const diagnosticoIcon = plan.tiene_diagnostico ? '✅' : '⚪';
+    const diagnosticoText = plan.tiene_diagnostico ? 'Con diagnóstico' : 'Sin diagnóstico';
+    
+    // Adaptar para mostrar campo_formativo o materia
+    const campoFormativo = plan.campo_formativo_principal || plan.campo_formativo || plan.materia || '';
+    
+    return `
+        <div class="plan-card-consulta">
+            <div class="plan-card-header-consulta">
+                <div class="plan-card-icon">📚</div>
+                <div class="plan-card-info">
+                    <h3 class="plan-card-title">${escapeHtml(plan.nombre_plan)}</h3>
+                    <div class="plan-card-meta">
+                        <span class="meta-item">📅 ${fecha}</span>
+                        <span class="meta-item">📊 ${plan.num_modulos} módulos</span>
+                        <span class="meta-item">${diagnosticoIcon} ${diagnosticoText}</span>
+                    </div>
+                    ${plan.grado ? `<div class="plan-card-badge">${escapeHtml(plan.grado)}</div>` : ''}
+                    ${campoFormativo ? `<div class="plan-card-badge secondary">${escapeHtml(campoFormativo)}</div>` : ''}
+                </div>
+            </div>
+            <div class="plan-card-actions">
+                <button class="btn-action btn-view" onclick="showPlanDetail('${plan.plan_id}')" title="Ver detalle">
+                    👁️ Ver
+                </button>
+                <button class="btn-action btn-download" onclick="downloadPlan('${plan.plan_id}')" title="Descargar JSON">
+                    📥 Descargar
+                </button>
+                <button class="btn-action btn-delete" onclick="confirmDeletePlan('${plan.plan_id}')" title="Eliminar">
+                    🗑️ Eliminar
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+function updateConsultaStats() {
+    const total = planesGenerados.length;
+    const conDiagnostico = planesGenerados.filter(p => p.tiene_diagnostico).length;
+    
+    consultaStats.innerHTML = `
+        <span>📊 ${total} ${total === 1 ? 'plan generado' : 'planes generados'}</span>
+        ${conDiagnostico > 0 ? `<span>✅ ${conDiagnostico} con diagnóstico</span>` : ''}
+    `;
+}
+
+async function showPlanDetail(planId) {
+    try {
+        showLoading('Cargando plan...');
+        
+        const response = await apiRequest(`/plans/${planId}`);
+        
+        if (!response.success) {
+            throw new Error('No se pudo cargar el plan');
+        }
+        
+        const plan = response.plan;
+        
+        // Actualizar título del modal
+        planDetailTitle.textContent = plan.nombre_plan;
+        
+        // Detectar si es estructura NUEVA o ANTIGUA
+        const esEstructuraNueva = plan.modulos[0] && plan.modulos[0].actividad_inicio !== undefined;
+        
+        // Generar contenido adaptado
+        let html = `
+            <div class="plan-detail-header">
+                <div class="plan-detail-meta">
+                    ${plan.grado ? `<span class="detail-badge">${escapeHtml(plan.grado)}</span>` : ''}
+                    ${plan.campo_formativo_principal ? `<span class="detail-badge secondary">${escapeHtml(plan.campo_formativo_principal)}</span>` : ''}
+                    ${plan.materia && !plan.campo_formativo_principal ? `<span class="detail-badge secondary">${escapeHtml(plan.materia)}</span>` : ''}
+                    ${plan.edad_aprox ? `<span class="detail-badge secondary">👶 ${escapeHtml(plan.edad_aprox)}</span>` : ''}
+                </div>
+                <div class="plan-detail-info">
+                    <p><strong>📅 Generado:</strong> ${new Date(plan.fecha_generacion).toLocaleString('es-MX')}</p>
+                    <p><strong>📊 Total de módulos:</strong> ${plan.num_modulos}</p>
+                    ${plan.duracion_total ? `<p><strong>⏱️ Duración total:</strong> ${plan.duracion_total}</p>` : ''}
+                    <p><strong>🤖 Generado con:</strong> ${plan.generado_con || 'IA'}</p>
+                    ${plan.tiene_diagnostico ? '<p><strong>✅ Personalizado con diagnóstico del grupo</strong></p>' : '<p><strong>⚪ Sin diagnóstico (plan estándar)</strong></p>'}
+                </div>
+                
+                ${plan.ejes_articuladores_generales && plan.ejes_articuladores_generales.length > 0 ? `
+                    <div class="plan-ejes-section">
+                        <h4>🔗 Ejes Articuladores:</h4>
+                        <div class="ejes-list">
+                            ${plan.ejes_articuladores_generales.map(eje => `<span class="eje-badge">${escapeHtml(eje)}</span>`).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+            </div>
+            
+            <div class="plan-modules-container">
         `;
+        
+        // Agregar módulos según la estructura
+        plan.modulos.forEach((modulo, index) => {
+            html += `
+                <div class="module-card" id="module-${index}">
+                    <div class="module-header" onclick="toggleModule(${index})">
+                        <div class="module-number">Módulo ${modulo.numero}</div>
+                        <h3 class="module-title">${escapeHtml(modulo.nombre)}</h3>
+                        <span class="module-arrow">▼</span>
+                    </div>
+                    <div class="module-body" id="module-body-${index}">
+            `;
+            
+            // SI ES ESTRUCTURA NUEVA (con actividad_inicio, actividades_desarrollo, etc.)
+            if (esEstructuraNueva) {
+                html += `
+                    ${modulo.campo_formativo ? `
+                        <div class="module-section">
+                            <h4>📚 Campo Formativo</h4>
+                            <p>${escapeHtml(modulo.campo_formativo)}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${modulo.ejes_articuladores && modulo.ejes_articuladores.length > 0 ? `
+                        <div class="module-section">
+                            <h4>🔗 Ejes Articuladores</h4>
+                            <div class="ejes-list-small">
+                                ${modulo.ejes_articuladores.map(eje => `<span class="eje-badge-small">${escapeHtml(eje)}</span>`).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    ${modulo.aprendizaje_esperado ? `
+                        <div class="module-section">
+                            <h4>🎯 Aprendizaje Esperado</h4>
+                            <p>${escapeHtml(modulo.aprendizaje_esperado)}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${modulo.tiempo_estimado ? `
+                        <div class="module-section">
+                            <h4>⏱️ Tiempo Estimado</h4>
+                            <p>${escapeHtml(modulo.tiempo_estimado)}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${modulo.actividad_inicio ? `
+                        <div class="module-section actividad-section">
+                            <h4>🎬 Actividad de Inicio: ${escapeHtml(modulo.actividad_inicio.nombre)}</h4>
+                            <p><strong>Descripción:</strong> ${escapeHtml(modulo.actividad_inicio.descripcion)}</p>
+                            <p><strong>⏱️ Duración:</strong> ${escapeHtml(modulo.actividad_inicio.duracion)}</p>
+                            ${modulo.actividad_inicio.materiales ? `
+                                <p><strong>🛠️ Materiales:</strong> ${Array.isArray(modulo.actividad_inicio.materiales) ? modulo.actividad_inicio.materiales.map(m => escapeHtml(m)).join(', ') : escapeHtml(modulo.actividad_inicio.materiales)}</p>
+                            ` : ''}
+                            ${modulo.actividad_inicio.organizacion ? `
+                                <p><strong>👥 Organización:</strong> ${escapeHtml(modulo.actividad_inicio.organizacion)}</p>
+                            ` : ''}
+                        </div>
+                    ` : ''}
+                    
+                    ${modulo.actividades_desarrollo && modulo.actividades_desarrollo.length > 0 ? `
+                        <div class="module-section actividad-section">
+                            <h4>🚀 Actividades de Desarrollo</h4>
+                            ${modulo.actividades_desarrollo.map((act, idx) => `
+                                <div class="actividad-card">
+                                    <h5>Actividad ${idx + 1}: ${escapeHtml(act.nombre)}</h5>
+                                    <p><strong>Tipo:</strong> ${act.tipo ? `<span class="tipo-badge">${escapeHtml(act.tipo)}</span>` : 'N/A'}</p>
+                                    <p><strong>Descripción:</strong> ${escapeHtml(act.descripcion)}</p>
+                                    ${act.duracion ? `<p><strong>⏱️ Duración:</strong> ${escapeHtml(act.duracion)}</p>` : ''}
+                                    ${act.organizacion ? `<p><strong>👥 Organización:</strong> ${escapeHtml(act.organizacion)}</p>` : ''}
+                                    ${act.materiales ? `
+                                        <p><strong>🛠️ Materiales:</strong> ${Array.isArray(act.materiales) ? act.materiales.map(m => escapeHtml(m)).join(', ') : escapeHtml(act.materiales)}</p>
+                                    ` : ''}
+                                    ${act.aspectos_a_observar ? `
+                                        <p><strong>👀 Aspectos a observar:</strong> ${escapeHtml(act.aspectos_a_observar)}</p>
+                                    ` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                    
+                    ${modulo.actividad_cierre ? `
+                        <div class="module-section actividad-section">
+                            <h4>🎬 Actividad de Cierre: ${escapeHtml(modulo.actividad_cierre.nombre)}</h4>
+                            <p><strong>Descripción:</strong> ${escapeHtml(modulo.actividad_cierre.descripcion)}</p>
+                            <p><strong>⏱️ Duración:</strong> ${escapeHtml(modulo.actividad_cierre.duracion)}</p>
+                            ${modulo.actividad_cierre.preguntas_guia && modulo.actividad_cierre.preguntas_guia.length > 0 ? `
+                                <p><strong>💬 Preguntas guía:</strong></p>
+                                <ul class="preguntas-list">
+                                    ${modulo.actividad_cierre.preguntas_guia.map(p => `<li>${escapeHtml(p)}</li>`).join('')}
+                                </ul>
+                            ` : ''}
+                        </div>
+                    ` : ''}
+                    
+                    ${modulo.consejos_maestra ? `
+                        <div class="module-section">
+                            <h4>💡 Consejos para la Maestra</h4>
+                            <p>${escapeHtml(modulo.consejos_maestra)}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${modulo.variaciones ? `
+                        <div class="module-section">
+                            <h4>🔄 Variaciones</h4>
+                            <p>${escapeHtml(modulo.variaciones)}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${modulo.vinculo_familia ? `
+                        <div class="module-section">
+                            <h4>🏠 Vínculo con la Familia</h4>
+                            <p>${escapeHtml(modulo.vinculo_familia)}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${modulo.evaluacion ? `
+                        <div class="module-section">
+                            <h4>📋 Evaluación</h4>
+                            <p>${escapeHtml(modulo.evaluacion)}</p>
+                        </div>
+                    ` : ''}
+                `;
+            } 
+            // SI ES ESTRUCTURA ANTIGUA (con tema, objetivo, planteamiento, etc.)
+            else {
+                html += `
+                    ${modulo.tema ? `
+                        <div class="module-section">
+                            <h4>🎯 Tema</h4>
+                            <p>${escapeHtml(modulo.tema)}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${modulo.objetivo ? `
+                        <div class="module-section">
+                            <h4>📋 Objetivo</h4>
+                            <p>${escapeHtml(modulo.objetivo)}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${modulo.planteamiento ? `
+                        <div class="module-section">
+                            <h4>📝 Planteamiento</h4>
+                            <p>${escapeHtml(modulo.planteamiento)}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${modulo.materiales ? `
+                        <div class="module-section">
+                            <h4>🛠️ Materiales</h4>
+                            <p>${escapeHtml(modulo.materiales)}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${modulo.tiempo ? `
+                        <div class="module-section">
+                            <h4>⏱️ Tiempo</h4>
+                            <p>${escapeHtml(modulo.tiempo)}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${modulo.participacion ? `
+                        <div class="module-section">
+                            <h4>👥 Participación</h4>
+                            <p>${escapeHtml(modulo.participacion)}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${modulo.ejes_articulares ? `
+                        <div class="module-section">
+                            <h4>🔗 Ejes Articulares</h4>
+                            <p>${escapeHtml(modulo.ejes_articulares)}</p>
+                        </div>
+                    ` : ''}
+                `;
+            }
+            
+            html += `
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+        
+        // Agregar sección de recursos si existe (solo estructura nueva)
+        if (plan.recursos_educativos) {
+            html += `
+                <div class="recursos-section">
+                    <h3>📚 Recursos Educativos</h3>
+            `;
+            
+            if (plan.recursos_educativos.materiales_generales && plan.recursos_educativos.materiales_generales.length > 0) {
+                html += `
+                    <div class="recurso-subsection">
+                        <h4>🛠️ Materiales Generales</h4>
+                        <ul class="materiales-list">
+                            ${plan.recursos_educativos.materiales_generales.map(m => `<li>${escapeHtml(m)}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+            
+            if (plan.recursos_educativos.cuentos_recomendados && plan.recursos_educativos.cuentos_recomendados.length > 0) {
+                html += `
+                    <div class="recurso-subsection">
+                        <h4>📖 Cuentos Recomendados</h4>
+                        ${plan.recursos_educativos.cuentos_recomendados.map(cuento => `
+                            <div class="recurso-card">
+                                <p><strong>${escapeHtml(cuento.titulo)}</strong></p>
+                                ${cuento.autor ? `<p><em>Autor: ${escapeHtml(cuento.autor)}</em></p>` : ''}
+                                <div class="recurso-badges">
+                                    <span class="recurso-badge ${cuento.tipo === 'RECURSO REAL' ? 'real' : 'creativo'}">${escapeHtml(cuento.tipo)}</span>
+                                    <span class="recurso-badge ${cuento.acceso === 'GRATUITO' ? 'gratuito' : 'compra'}">${escapeHtml(cuento.acceso)}</span>
+                                </div>
+                                ${cuento.disponibilidad ? `<p class="disponibilidad">📍 ${escapeHtml(cuento.disponibilidad)}</p>` : ''}
+                                ${cuento.descripcion_breve ? `<p class="descripcion">${escapeHtml(cuento.descripcion_breve)}</p>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
+            if (plan.recursos_educativos.canciones_recomendadas && plan.recursos_educativos.canciones_recomendadas.length > 0) {
+                html += `
+                    <div class="recurso-subsection">
+                        <h4>🎵 Canciones Recomendadas</h4>
+                        ${plan.recursos_educativos.canciones_recomendadas.map(cancion => `
+                            <div class="recurso-card">
+                                <p><strong>${escapeHtml(cancion.titulo)}</strong></p>
+                                <div class="recurso-badges">
+                                    <span class="recurso-badge ${cancion.tipo === 'RECURSO REAL' ? 'real' : 'creativo'}">${escapeHtml(cancion.tipo)}</span>
+                                    <span class="recurso-badge ${cancion.acceso === 'GRATUITO' ? 'gratuito' : 'compra'}">${escapeHtml(cancion.acceso)}</span>
+                                </div>
+                                ${cancion.disponibilidad ? `<p class="disponibilidad">📍 ${escapeHtml(cancion.disponibilidad)}</p>` : ''}
+                                ${cancion.uso_sugerido ? `<p class="uso">💡 ${escapeHtml(cancion.uso_sugerido)}</p>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
+            html += '</div>';
+        }
+        
+        // Agregar recomendaciones de ambiente si existen
+        if (plan.recomendaciones_ambiente) {
+            html += `
+                <div class="recomendaciones-section">
+                    <h3>🏫 Recomendaciones para el Ambiente</h3>
+                    <p>${escapeHtml(plan.recomendaciones_ambiente)}</p>
+                </div>
+            `;
+        }
+        
+        // Agregar vinculación curricular si existe
+        if (plan.vinculacion_curricular) {
+            html += `
+                <div class="vinculacion-section">
+                    <h3>🔗 Vinculación Curricular</h3>
+                    <div class="vinculacion-grid">
+                        ${plan.vinculacion_curricular.campo_formativo_principal ? `
+                            <div class="vinculacion-item">
+                                <h4>Campo Formativo Principal:</h4>
+                                <p>${escapeHtml(plan.vinculacion_curricular.campo_formativo_principal)}</p>
+                            </div>
+                        ` : ''}
+                        
+                        ${plan.vinculacion_curricular.campos_secundarios && plan.vinculacion_curricular.campos_secundarios.length > 0 ? `
+                            <div class="vinculacion-item">
+                                <h4>Campos Secundarios:</h4>
+                                <ul>
+                                    ${plan.vinculacion_curricular.campos_secundarios.map(c => `<li>${escapeHtml(c)}</li>`).join('')}
+                                </ul>
+                            </div>
+                        ` : ''}
+                        
+                        ${plan.vinculacion_curricular.ejes_transversales && plan.vinculacion_curricular.ejes_transversales.length > 0 ? `
+                            <div class="vinculacion-item">
+                                <h4>Ejes Transversales:</h4>
+                                <ul>
+                                    ${plan.vinculacion_curricular.ejes_transversales.map(e => `<li>${escapeHtml(e)}</li>`).join('')}
+                                </ul>
+                            </div>
+                        ` : ''}
+                        
+                        ${plan.vinculacion_curricular.aprendizajes_clave && plan.vinculacion_curricular.aprendizajes_clave.length > 0 ? `
+                            <div class="vinculacion-item">
+                                <h4>Aprendizajes Clave:</h4>
+                                <ul>
+                                    ${plan.vinculacion_curricular.aprendizajes_clave.map(a => `<li>${escapeHtml(a)}</li>`).join('')}
+                                </ul>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+        
+        planDetailContent.innerHTML = html;
+        hideLoading();
+        planDetailModal.classList.add('active');
+        
+    } catch (error) {
+        hideLoading();
+        showMessage(`Error cargando plan: ${error.message}`, 'error');
     }
-    return html;
+}
+
+function toggleModule(index) {
+    const moduleBody = document.getElementById(`module-body-${index}`);
+    const arrow = document.querySelector(`#module-${index} .module-arrow`);
+    
+    if (moduleBody.classList.contains('expanded')) {
+        moduleBody.classList.remove('expanded');
+        arrow.style.transform = 'rotate(0deg)';
+    } else {
+        moduleBody.classList.add('expanded');
+        arrow.style.transform = 'rotate(180deg)';
+    }
+}
+
+async function downloadPlan(planId) {
+    try {
+        showLoading('Generando documento Word...');
+        
+        // Cambiar la URL para usar la nueva ruta de descarga Word
+        const response = await fetch(`${API_BASE}/plans/${planId}/download`, {
+            headers: {
+                'Authorization': `Bearer ${currentToken}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Error descargando plan');
+        }
+        
+        // Obtener el nombre del archivo desde los headers o generar uno
+        const contentDisposition = response.headers.get('Content-Disposition');
+        let filename = 'Plan_Educativo.docx';
+        
+        if (contentDisposition) {
+            const filenameMatch = contentDisposition.match(/filename=(.+)/);
+            if (filenameMatch) {
+                filename = filenameMatch[1].replace(/['"]/g, '');
+            }
+        }
+        
+        // Crear blob y descargar
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        hideLoading();
+        showMessage('Plan descargado correctamente en formato Word', 'success');
+        
+    } catch (error) {
+        hideLoading();
+        showMessage(`Error descargando: ${error.message}`, 'error');
+    }
+}
+
+async function deletePlan(planId) {
+    try {
+        showLoading('Eliminando plan...');
+        
+        await apiRequest(`/plans/${planId}`, {
+            method: 'DELETE'
+        });
+        
+        showMessage('Plan eliminado correctamente', 'success');
+        await loadPlanes();
+        
+    } catch (error) {
+        showMessage(`Error eliminando plan: ${error.message}`, 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+function confirmDeletePlan(planId) {
+    const plan = planesGenerados.find(p => p.plan_id === planId);
+    const planName = plan ? plan.nombre_plan : 'este plan';
+    
+    showModal(
+        `¿Estás seguro de que quieres eliminar "${planName}"? Esta acción no se puede deshacer.`,
+        () => deletePlan(planId)
+    );
 }
 
 function changePage(page) {
-    const totalPages = Math.ceil(planesDeEstudio.length / itemsPerPage);
+    const totalPages = Math.ceil(planesGenerados.length / itemsPerPage);
     if (page < 1 || page > totalPages) return;
     
     currentPage = page;
@@ -393,246 +980,19 @@ function changePage(page) {
     planesList.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function togglePlanCard(index) {
-    const cardBody = document.getElementById(`plan-body-${index}`);
-    const arrow = cardBody.previousElementSibling.querySelector('.plan-card-arrow');
-    
-    if (cardBody.classList.contains('expanded')) {
-        cardBody.classList.remove('expanded');
-        arrow.style.transform = 'rotate(0deg)';
-    } else {
-        cardBody.classList.add('expanded');
-        arrow.style.transform = 'rotate(180deg)';
-    }
-}
-
-function openPlanModal() {
-    planModal.classList.add('active');
-    planNombreInput.value = '';
-    modulesContainer.innerHTML = '';
-    currentModuleIndex = 0;
-    addModule();
-}
-
-function closePlanModalFn() {
-    planModal.classList.remove('active');
-}
-
-function addModule() {
-    currentModuleIndex++;
-    const moduleDiv = document.createElement('div');
-    moduleDiv.className = 'module-item';
-    moduleDiv.dataset.moduleIndex = currentModuleIndex;
-    
-    moduleDiv.innerHTML = `
-        <div class="module-header">
-            <h4>Módulo ${currentModuleIndex}</h4>
-            <button class="btn-icon-delete" onclick="removeModule(${currentModuleIndex})" title="Eliminar módulo">
-                ✕
-            </button>
-        </div>
-        <div class="form-group">
-            <label>Objetivo:</label>
-            <textarea class="module-objetivo" rows="2" placeholder="Escribe el objetivo del módulo"></textarea>
-        </div>
-        <div class="form-group">
-            <label>Actividad:</label>
-            <div class="activity-selector">
-                <button type="button" class="btn-file-selector" onclick="openFileSelector(${currentModuleIndex})">
-                    📁 Seleccionar archivo
-                </button>
-                <div class="selected-file" data-module="${currentModuleIndex}">
-                    <span class="no-file">No se ha seleccionado ningún archivo</span>
-                </div>
-            </div>
-        </div>
-        <div class="module-actions">
-            <button type="button" class="btn btn-secondary btn-sm" onclick="changeModule(${currentModuleIndex})">Cambiar</button>
-            <button type="button" class="btn btn-danger btn-sm" onclick="removeActivityModule(${currentModuleIndex})">Eliminar</button>
-        </div>
-    `;
-    
-    modulesContainer.appendChild(moduleDiv);
-}
-
-function removeModule(moduleIndex) {
-    const moduleDiv = document.querySelector(`[data-module-index="${moduleIndex}"]`);
-    if (moduleDiv) {
-        moduleDiv.remove();
-    }
-}
-
-function removeActivityModule(moduleIndex) {
-    const selectedFileDiv = document.querySelector(`.selected-file[data-module="${moduleIndex}"]`);
-    if (selectedFileDiv) {
-        selectedFileDiv.innerHTML = '<span class="no-file">No se ha seleccionado ningún archivo</span>';
-        selectedFileDiv.dataset.filename = '';
-        selectedFileDiv.dataset.category = '';
-    }
-}
-
-function changeModule(moduleIndex) {
-    openFileSelector(moduleIndex);
-}
-
-async function openFileSelector(moduleIndex) {
-    currentActivityElement = document.querySelector(`.selected-file[data-module="${moduleIndex}"]`);
-    
-    // Cargar archivos REALES desde la API
-    try {
-        showLoading('Cargando archivos...');
-        
-        const files = await apiRequest('/files/list');
-        
-        hideLoading();
-        
-        if (files.length === 0) {
-            fileSelectorList.innerHTML = `
-                <div class="empty-state">
-                    <p>No hay archivos en tu biblioteca</p>
-                    <p style="font-size: 12px; margin-top: 10px;">Sube archivos en la sección "ARCHIVOS" primero</p>
-                </div>
-            `;
-        } else {
-            fileSelectorList.innerHTML = files.map(file => {
-                const icon = file.category === 'procesado' ? '📄' : getFileIcon(file.type);
-                return `
-                    <div class="file-selector-item" onclick="selectFile('${escapeHtml(file.name)}', '${file.category}')">
-                        <span class="file-icon">${icon}</span>
-                        <div class="file-selector-info">
-                            <span class="file-selector-name">${escapeHtml(file.name)}</span>
-                            <span class="file-selector-type">${file.type} • ${file.size}</span>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-        
-        fileSelectorModal.classList.add('active');
-    } catch (error) {
-        hideLoading();
-        showMessage('Error cargando archivos: ' + error.message, 'error');
-    }
-}
-
-function getFileIcon(fileType) {
-    const type = fileType.toLowerCase();
-    if (type.includes('pdf')) return '📄';
-    if (type.includes('word')) return '📝';
-    if (type.includes('excel')) return '📊';
-    if (type.includes('imagen')) return '🖼️';
-    if (type.includes('txt')) return '📄';
-    return '📎';
-}
-
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-function selectFile(filename, category) {
-    if (currentActivityElement) {
-        const icon = category === 'procesado' ? '📄' : '📁';
-        currentActivityElement.innerHTML = `
-            <span class="selected-file-icon">${icon}</span>
-            <span class="selected-file-name">${escapeHtml(filename)}</span>
-        `;
-        currentActivityElement.dataset.filename = filename;
-        currentActivityElement.dataset.category = category;
-    }
-    fileSelectorModal.classList.remove('active');
-}
-
-function savePlan() {
-    const nombre = planNombreInput.value.trim();
-    
-    if (!nombre) {
-        showMessage('Por favor ingresa un nombre para el plan', 'error');
-        return;
-    }
-    
-    const modules = Array.from(modulesContainer.querySelectorAll('.module-item'));
-    
-    if (modules.length === 0) {
-        showMessage('Debes agregar al menos un módulo', 'error');
-        return;
-    }
-    
-    const modulos = modules.map(moduleDiv => {
-        const objetivo = moduleDiv.querySelector('.module-objetivo').value.trim();
-        const selectedFileDiv = moduleDiv.querySelector('.selected-file');
-        const filename = selectedFileDiv.dataset.filename || '';
-        const category = selectedFileDiv.dataset.category || '';
-        
-        return {
-            objetivo: objetivo || 'Sin objetivo definido',
-            actividad: filename || 'Sin archivo seleccionado',
-            category: category
-        };
-    });
-    
-    const plan = {
-        nombre,
-        modulos,
-        fecha: new Date().toISOString(),
-        usuario: currentUser
-    };
-    
-    planesDeEstudio.push(plan);
-    savePlanesToStorage();
-    
-    showMessage('Plan de estudio guardado correctamente', 'success');
-    closePlanModalFn();
-    
-    // Ir a la última página donde está el nuevo plan
-    const totalPages = Math.ceil(planesDeEstudio.length / itemsPerPage);
-    currentPage = totalPages;
-    
-    displayPlanes();
-}
-
-function deletePlan(index) {
-    showModal(
-        '¿Estás seguro de que quieres eliminar este plan de estudio?',
-        () => {
-            planesDeEstudio.splice(index, 1);
-            savePlanesToStorage();
-            
-            // Ajustar página actual si es necesario
-            const totalPages = Math.ceil(planesDeEstudio.length / itemsPerPage);
-            if (currentPage > totalPages && totalPages > 0) {
-                currentPage = totalPages;
-            } else if (planesDeEstudio.length === 0) {
-                currentPage = 1;
-            }
-            
-            displayPlanes();
-            showMessage('Plan eliminado correctamente', 'success');
-        }
-    );
-}
-
 // ===== FUNCIONES DE VISTA PREVIA =====
 
 async function openFilePreview(category, filename) {
     try {
         showLoading('Cargando vista previa...');
         
-        // Determinar tipo de archivo
         const ext = filename.split('.').pop().toLowerCase();
         
-        // Mostrar modal
         previewModal.classList.add('active');
         previewFilename.textContent = filename;
-        
-        // Guardar archivo actual para descargar
         currentPreviewFile = { category, filename };
-        
-        // Limpiar contenedor
         previewContainer.innerHTML = '<div class="loading-preview"><div class="spinner"></div><p>Cargando...</p></div>';
         
-        // Obtener el contenido
         const response = await fetch(`${API_BASE}/files/preview/${category}/${encodeURIComponent(filename)}`, {
             headers: {
                 'Authorization': `Bearer ${currentToken}`
@@ -643,12 +1003,9 @@ async function openFilePreview(category, filename) {
             throw new Error('No se pudo cargar la vista previa');
         }
         
-        // Limpiar contenedor nuevamente
         previewContainer.innerHTML = '';
         
-        // Mostrar según tipo de archivo
         if (ext === 'pdf') {
-            // PDF - usar iframe
             const blob = await response.blob();
             const url = URL.createObjectURL(blob);
             
@@ -657,7 +1014,6 @@ async function openFilePreview(category, filename) {
                 <iframe src="${url}" style="width: 100%; height: 100%; border: none;"></iframe>
             `;
         } else if (['jpg', 'jpeg', 'png', 'gif', 'bmp'].includes(ext)) {
-            // Imagen
             const blob = await response.blob();
             const url = URL.createObjectURL(blob);
             
@@ -667,7 +1023,6 @@ async function openFilePreview(category, filename) {
             `;
             previewContainer.style.background = '#000';
         } else if (ext === 'txt') {
-            // Texto
             const data = await response.json();
             
             previewContainer.classList.add('text-preview');
@@ -738,6 +1093,26 @@ async function downloadFileAction(category, filename) {
         hideLoading();
     }
 }
+
+// ===== UTILIDADES =====
+
+function showLoadingWithProgress(mainText, subText) {
+    const loadingText = document.getElementById('loading-text');
+    const loadingSubtext = document.getElementById('loading-subtext');
+    
+    loadingText.textContent = mainText;
+    loadingSubtext.textContent = subText;
+    
+    document.getElementById('loading-overlay').classList.remove('hidden');
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
 // ===== CERRAR SESIÓN =====
 function logout() {
     clearSession();
@@ -765,36 +1140,28 @@ function setupEventListeners() {
         }
     });
     
-    // Event listeners Plan de Estudio
-    createPlanBtn.addEventListener('click', openPlanModal);
-    closePlanModal.addEventListener('click', closePlanModalFn);
-    cancelPlanBtn.addEventListener('click', closePlanModalFn);
-    savePlanBtn.addEventListener('click', savePlan);
-    addModuleBtn.addEventListener('click', addModule);
+    // Event listeners para generación de planes
+    generatePlanBtn.addEventListener('click', openGeneratePlanModal);
+    closeGeneratePlanModal.addEventListener('click', closeGeneratePlanModalFn);
+    cancelGeneratePlanBtn.addEventListener('click', closeGeneratePlanModalFn);
+    processPlanBtn.addEventListener('click', processPlan);
     
-    // Cerrar modal selector de archivos
-    closeFileSelector.addEventListener('click', () => {
-        fileSelectorModal.classList.remove('active');
-    });
+    planFileInput.addEventListener('change', () => updateFileDisplay(planFileInput, planFileSelected));
+    diagnosticoFileInput.addEventListener('change', () => updateFileDisplay(diagnosticoFileInput, diagnosticoFileSelected));
     
     // Cerrar modales al hacer clic fuera
-    planModal.addEventListener('click', (e) => {
-        if (e.target === planModal) {
-            closePlanModalFn();
+    generatePlanModal.addEventListener('click', (e) => {
+        if (e.target === generatePlanModal) {
+            closeGeneratePlanModalFn();
         }
     });
     
-    fileSelectorModal.addEventListener('click', (e) => {
-        if (e.target === fileSelectorModal) {
-            fileSelectorModal.classList.remove('active');
-        }
-    });
     // Event listeners para vista previa
     closePreviewModal.addEventListener('click', () => {
         previewModal.classList.remove('active');
         previewContainer.innerHTML = '';
-        previewContainer.className = 'preview-container'; // Reset classes
-        previewContainer.style.background = ''; // Reset background
+        previewContainer.className = 'preview-container';
+        previewContainer.style.background = '';
         currentPreviewFile = null;
     });
 
@@ -804,7 +1171,6 @@ function setupEventListeners() {
         }
     });
 
-    // Cerrar modal al hacer clic fuera
     previewModal.addEventListener('click', (e) => {
         if (e.target === previewModal) {
             previewModal.classList.remove('active');
@@ -814,17 +1180,25 @@ function setupEventListeners() {
             currentPreviewFile = null;
         }
     });
+    
+    // Event listeners para modal de detalle
+    closePlanDetailModal.addEventListener('click', () => {
+        planDetailModal.classList.remove('active');
+    });
+    
+    planDetailModal.addEventListener('click', (e) => {
+        if (e.target === planDetailModal) {
+            planDetailModal.classList.remove('active');
+        }
+    });
 }
 
 // Hacer funciones globales para usar en onclick
 window.confirmDeleteFile = confirmDeleteFile;
 window.openFilePreview = openFilePreview;
 window.downloadFileAction = downloadFileAction;
-window.removeModule = removeModule;
-window.removeActivityModule = removeActivityModule;
-window.changeModule = changeModule;
-window.openFileSelector = openFileSelector;
-window.selectFile = selectFile;
-window.deletePlan = deletePlan;
-window.togglePlanCard = togglePlanCard;
+window.showPlanDetail = showPlanDetail;
+window.downloadPlan = downloadPlan;
+window.confirmDeletePlan = confirmDeletePlan;
 window.changePage = changePage;
+window.toggleModule = toggleModule;

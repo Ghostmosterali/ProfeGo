@@ -20,7 +20,7 @@
         <nav class="nav-menu">
             <button id="nav-inicio" class="nav-btn active">🏠 INICIO</button>
             <button id="nav-archivos" class="nav-btn">📁 ARCHIVOS</button>
-            <button id="nav-planes" class="nav-btn">📚 PLAN DE ESTUDIO</button>
+            <button id="nav-consulta" class="nav-btn">📚 CONSULTA</button>
             <button id="nav-acerca" class="nav-btn">ℹ️ ACERCA DE</button>
         </nav>
 
@@ -31,7 +31,7 @@
             <div id="inicio-content" class="content-section active">
                 <div class="welcome-container">
                     <h2>¡Bienvenido a ProfeGo!</h2>
-                    <p class="welcome-subtitle">Tu plataforma personal para gestionar archivos y recursos educativos</p>
+                    <p class="welcome-subtitle">Tu plataforma personal para gestionar archivos y generar planes de estudio personalizados</p>
                     
                     <div class="features-grid">
                         <div class="feature-card">
@@ -40,14 +40,14 @@
                             <p>Almacena tus documentos de forma segura</p>
                         </div>
                         <div class="feature-card">
-                            <div class="feature-icon">🔄</div>
-                            <h3>Procesa automáticamente</h3>
-                            <p>Extrae texto con OCR y conversión</p>
+                            <div class="feature-icon">🤖</div>
+                            <h3>IA Generativa</h3>
+                            <p>Genera planes personalizados con Gemini AI</p>
                         </div>
                         <div class="feature-card">
-                            <div class="feature-icon">📥</div>
-                            <h3>Vista previa</h3>
-                            <p>Visualiza tus archivos antes de descargar</p>
+                            <div class="feature-icon">📊</div>
+                            <h3>Planes estructurados</h3>
+                            <p>Módulos organizados y listos para usar</p>
                         </div>
                     </div>
                 </div>
@@ -56,9 +56,20 @@
             <!-- Sección Archivos -->
             <div id="archivos-content" class="content-section hidden">
                 <div class="files-container">
+                    <!-- NUEVO: Botón principal para generar planes -->
+                    <div class="generate-plan-section">
+                        <button id="generate-plan-btn" class="btn btn-generate-plan">
+                            ➕ AÑADIR PLAN
+                        </button>
+                        <p class="section-help-text">Sube tu plan de estudios y diagnóstico para generar módulos personalizados</p>
+                    </div>
+                    
+                    <div class="divider"></div>
+                    
                     <div class="upload-section">
-                        <label for="file-input" class="upload-btn">📤 Subir y procesar archivos</label>
+                        <label for="file-input" class="upload-btn">📤 Subir archivos adicionales</label>
                         <input type="file" id="file-input" multiple accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.xlsx,.xls" hidden>
+                        <p class="section-help-text">Sube archivos que quieras almacenar o procesar</p>
                     </div>
                     
                     <h2 class="library-title">📚 Mi Biblioteca</h2>
@@ -69,22 +80,23 @@
                 </div>
             </div>
 
-            <!-- Sección Plan de Estudio -->
-            <div id="planes-content" class="content-section hidden">
-                <div class="planes-container">
-                    <div class="planes-header">
-                        <h2 class="planes-title">📚 Planes de Estudio</h2>
-                        <button id="create-plan-btn" class="btn btn-primary">
-                            ➕ Crear Plan de Estudio
-                        </button>
+            <!-- Sección Consulta (antes "Plan de Estudio") -->
+            <div id="consulta-content" class="content-section hidden">
+                <div class="consulta-container">
+                    <div class="consulta-header">
+                        <h2 class="consulta-title">📚 Consulta de Planes</h2>
+                        <div class="consulta-stats" id="consulta-stats">
+                            <span>📊 0 planes generados</span>
+                        </div>
                     </div>
 
-                    <!-- Historial de Planes -->
-                    <div class="planes-history">
-                        <h3 class="section-subtitle">📖 Mis Planes de Estudio</h3>
+                    <!-- Lista de Planes Generados -->
+                    <div class="planes-generados">
                         <div id="planes-list" class="planes-list">
                             <div class="empty-state">
-                                <p>No hay actividades para mostrar.</p>
+                                <div class="empty-icon">📝</div>
+                                <h3>No hay planes generados aún</h3>
+                                <p>Ve a la sección ARCHIVOS y presiona "AÑADIR PLAN" para comenzar</p>
                             </div>
                         </div>
                     </div>
@@ -96,7 +108,7 @@
                 <div class="about-container">
                     <h2>Sobre ProfeGo</h2>
                     <p class="about-description">
-                        ProfeGo busca adaptar la forma tradicional de enseñanza a las necesidades digitales actuales mediante la integración de herramientas tecnológicas avanzadas como la inteligencia artificial a partir de planes de estudio personalizados, para que de esta forma ahorre tiempo y recursos a los educadores, y así mejorar la calidad educativa,permitiendo que los docentes personalicen las necesidades de cada estudiante de una manera más efectiva acorde a los alumnos.
+                        ProfeGo busca adaptar la forma tradicional de enseñanza a las necesidades digitales actuales mediante la integración de herramientas tecnológicas avanzadas como la inteligencia artificial a partir de planes de estudio personalizados, para que de esta forma ahorre tiempo y recursos a los educadores, y así mejorar la calidad educativa, permitiendo que los docentes personalicen las necesidades de cada estudiante de una manera más efectiva acorde a los alumnos.
                         Unificando todas las funciones en una sola plataforma, ProfeGo facilita la gestión de recursos educativos, permitiendo a los profesores centrarse en lo que realmente importa: la enseñanza y el aprendizaje.
                     </p>
                     
@@ -104,7 +116,8 @@
                     <ul class="features-list">
                         <li>• Almacenamiento seguro en la nube</li>
                         <li>• Procesamiento automático con OCR</li>
-                        <li>• Extracción de texto de múltiples formatos</li>
+                        <li>• Generación de planes con Gemini AI</li>
+                        <li>• Personalización según diagnóstico del grupo</li>
                         <li>• Vista previa de archivos</li>
                         <li>• Sincronización automática</li>
                         <li>• Interfaz intuitiva y fácil de usar</li>
@@ -113,6 +126,7 @@
                     <h3>Contacto:</h3>
                     <p class="about-description">
                         Si tienes alguna pregunta o sugerencia, no dudes en contactarnos en <a href="mailto:soporteprofego@gmail.com">soporteprofeGo@gmail.com</a>
+                    </p>
                 </div>
             </div>
         </main>
@@ -122,7 +136,8 @@
     <div id="loading-overlay" class="loading-overlay hidden">
         <div class="loading-content">
             <div class="spinner"></div>
-            <p id="loading-text">Subiendo y procesando archivos...</p>
+            <p id="loading-text">Cargando...</p>
+            <p id="loading-subtext" class="loading-subtext"></p>
         </div>
     </div>
 
@@ -130,7 +145,7 @@
     <div id="confirm-modal" class="modal hidden">
         <div class="modal-content">
             <h3>Confirmar eliminación</h3>
-            <p id="confirm-message">¿Estás seguro de que quieres eliminar este archivo?</p>
+            <p id="confirm-message">¿Estás seguro de que quieres eliminar este elemento?</p>
             <div class="modal-buttons">
                 <button id="confirm-yes" class="btn btn-danger">Eliminar</button>
                 <button id="confirm-no" class="btn btn-secondary">Cancelar</button>
@@ -159,49 +174,85 @@
         </div>
     </div>
 
-    <!-- Modal Crear/Editar Plan de Estudio -->
-    <div id="plan-modal" class="modal-overlay">
-        <div class="plan-modal-container">
-            <div class="plan-modal-header">
-                <h2 id="plan-modal-title">Crear Plan de Estudio</h2>
-                <button id="close-plan-modal" class="close-modal-btn">✕</button>
+    <!-- NUEVO: Modal para Generar Plan -->
+    <div id="generate-plan-modal" class="modal-overlay">
+        <div class="generate-plan-modal-container">
+            <div class="generate-plan-modal-header">
+                <h2>➕ Generar Plan de Estudio</h2>
+                <button id="close-generate-plan-modal" class="close-modal-btn">✕</button>
             </div>
             
-            <div class="plan-modal-content">
-                <div class="plan-form">
-                    <div class="form-group">
-                        <label for="plan-nombre">Nombre del Plan:</label>
-                        <input type="text" id="plan-nombre" placeholder="Ej: Matemáticas Básicas" required>
+            <div class="generate-plan-modal-content">
+                <div class="generate-plan-form">
+                    <!-- Archivo 1: Plan de Estudios -->
+                    <div class="file-upload-row">
+                        <div class="file-upload-label">
+                            <span class="required-indicator">*</span>
+                            <label>📚 Plan de Estudios</label>
+                            <p class="help-text">Sube el plan de estudios oficial (PDF, Word, etc.)</p>
+                        </div>
+                        <div class="file-upload-input">
+                            <input type="file" id="plan-file-input" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png" hidden>
+                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('plan-file-input').click()">
+                                📁 Seleccionar archivo
+                            </button>
+                            <div id="plan-file-selected" class="file-selected-info">
+                                <span class="no-file-text">Ningún archivo seleccionado</span>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="modules-container" id="modules-container">
-                        <!-- Los módulos se agregarán aquí dinámicamente -->
+                    <!-- Archivo 2: Diagnóstico -->
+                    <div class="file-upload-row">
+                        <div class="file-upload-label">
+                            <label>🔍 Diagnóstico del Grupo</label>
+                            <p class="help-text">Opcional: Sube el diagnóstico para personalizar el plan</p>
+                        </div>
+                        <div class="file-upload-input">
+                            <input type="file" id="diagnostico-file-input" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png" hidden>
+                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('diagnostico-file-input').click()">
+                                📁 Seleccionar archivo
+                            </button>
+                            <div id="diagnostico-file-selected" class="file-selected-info">
+                                <span class="no-file-text">Ningún archivo seleccionado (opcional)</span>
+                            </div>
+                        </div>
                     </div>
 
-                    <button id="add-module-btn" class="btn btn-secondary">
-                        ➕ Agregar Módulo
-                    </button>
+                    <div class="info-box">
+                        <strong>ℹ️ Información:</strong>
+                        <ul>
+                            <li>El plan de estudios es <strong>obligatorio</strong></li>
+                            <li>El diagnóstico es <strong>opcional</strong> pero recomendado para personalizar</li>
+                            <li>Tamaño máximo por archivo: <strong>80MB</strong></li>
+                            <li>Formatos soportados: PDF, Word, imágenes, texto</li>
+                            <li>El procesamiento puede tardar <strong>1-3 minutos</strong></li>
+                        </ul>
+                    </div>
                 </div>
             </div>
 
-            <div class="plan-modal-footer">
-                <button id="save-plan-btn" class="btn btn-primary">Guardar Plan</button>
-                <button id="cancel-plan-btn" class="btn btn-secondary">Cancelar</button>
+            <div class="generate-plan-modal-footer">
+                <button id="process-plan-btn" class="btn btn-primary btn-large" disabled>
+                    🤖 Procesar y Generar Plan
+                </button>
+                <button id="cancel-generate-plan-btn" class="btn btn-secondary">
+                    Cancelar
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- Modal Selector de Archivos (Biblioteca) -->
-    <div id="file-selector-modal" class="modal-overlay">
-        <div class="file-selector-container">
-            <div class="file-selector-header">
-                <h3>Seleccionar archivo de la biblioteca</h3>
-                <button id="close-file-selector" class="close-modal-btn">✕</button>
+    <!-- NUEVO: Modal de Detalle de Plan -->
+    <div id="plan-detail-modal" class="modal-overlay">
+        <div class="plan-detail-modal-container">
+            <div class="plan-detail-modal-header">
+                <h2 id="plan-detail-title">Plan de Estudio</h2>
+                <button id="close-plan-detail-modal" class="close-modal-btn">✕</button>
             </div>
-            <div class="file-selector-content">
-                <div id="file-selector-list" class="file-selector-list">
-                    <!-- Los archivos se cargarán aquí -->
-                </div>
+            
+            <div class="plan-detail-modal-content" id="plan-detail-content">
+                <!-- El contenido del plan se cargará aquí dinámicamente -->
             </div>
         </div>
     </div>
